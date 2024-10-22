@@ -63,10 +63,16 @@
             align-items: center;
             text-align: center;
             transition: border-color 0.3s;
+            cursor: pointer;
         }
 
         #drop-zone.hover {
             border-color: #0056b3;
+        }
+
+        /* Hide the file input */
+        #file-input {
+            display: none;
         }
     </style>
 </head>
@@ -76,17 +82,20 @@
     <p>Upload your filled template to generate the assessment report.</p>
 
     <!-- GitHub download button -->
-    <a href="https://github.com/uppa1234/neuropsychological" 
+    <a href="https://github.com/uppa1234/neuropsychological_assessment" 
        class="github-button" target="_blank">
         Download the blank template <strong>blank.xlsx</strong> from here
     </a>
 
-    <!-- Drop zone for file upload -->
-    <div id="drop-zone">Drag & Drop Excel File Here</div>
+    <!-- Drop zone and file input -->
+    <div id="drop-zone">Drag & Drop Excel File Here or Click to Browse</div>
+    <input type="file" id="file-input" />
 
     <script>
         const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
 
+        // Handle drag and drop events
         dropZone.addEventListener('dragover', (event) => {
             event.preventDefault();
             dropZone.classList.add('hover');
@@ -99,8 +108,26 @@
         dropZone.addEventListener('drop', (event) => {
             event.preventDefault();
             dropZone.classList.remove('hover');
-            
+
             const file = event.dataTransfer.files[0];
+            handleFileUpload(file);
+        });
+
+        // Handle click event to open file browser
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle file input change (when a file is selected via browser)
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            handleFileUpload(file);
+        });
+
+        // Handle file upload logic
+        function handleFileUpload(file) {
+            if (!file) return;
+
             const formData = new FormData();
             formData.append('file', file);
 
@@ -133,7 +160,7 @@
             .catch(error => {
                 alert('Error: ' + error.message);
             });
-        });
+        }
     </script>
 </body>
 </html>
