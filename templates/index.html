@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuropsychological Assessment</title>
+    <style>
+        /* Styling for the entire page */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Styling for the title */
+        h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        /* Styling for the description */
+        p {
+            font-size: 18px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        /* Styling for the GitHub link button */
+        .github-button {
+            background-color: #24292e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .github-button:hover {
+            background-color: #3b434c;
+        }
+
+        /* Styling for the drop zone */
+        #drop-zone {
+            width: 400px;
+            height: 200px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        #drop-zone.hover {
+            border-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title and description -->
+    <h1>Neuropsychological Assessment</h1>
+    <p>Upload your filled template to generate the assessment report.</p>
+
+    <!-- GitHub download button -->
+    <a href="https://github.com/uppa1234/neuropsychological_assessment" 
+       class="github-button" target="_blank">
+        Download the blank template <strong>blank.xlsx</strong> from here
+    </a>
+
+    <!-- Drop zone for file upload -->
+    <div id="drop-zone">Drag & Drop Excel File Here</div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+
+        dropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropZone.classList.add('hover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('hover');
+        });
+
+        dropZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropZone.classList.remove('hover');
+            
+            const file = event.dataTransfer.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Extract the original filename without extension
+            const originalFileName = file.name.split('.').slice(0, -1).join('.');
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+
+                // Use the original filename with .docx extension
+                a.download = `${originalFileName}.docx`;
+
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        });
+    </script>
+</body>
+</html>
