@@ -95,7 +95,7 @@ def get_exec(df):
     imp_text = get_impaired('Executive Function', df=df)
 
     # Preserved
-    parts = ['Stroop', 'Clock Drawing', 'Letter Fluency', 'Category Fluency', 'Tower Test', 'Number Letter Switching', 'Motor Speed']
+    parts = ['Stroop', 'Letter Fluency', 'Category Fluency', 'Tower Test', 'Number Letter Switching', 'Motor Speed'] # , 'Clock Drawing'
     pre_text = get_preserved(parts, 'Executive Function', df=df)
 
     return [imp_text, pre_text]
