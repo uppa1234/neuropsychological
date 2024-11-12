@@ -57,10 +57,13 @@ def get_preserved(list, topic, df):
 def get_impaired(topic: str, df) -> str:
     imp = df.query(f'Topic == "{topic}" & Subtopic != "Main" & Interpretation != "Preserved"')
     imp_l = imp.Item.unique().tolist()
+    imp_m = df.query(f'Topic == "{topic}" & Subtopic == "Main" & Interpretation != "Preserved"')
+    imp_m_l = imp_m.Item.unique().tolist()
     if len(imp_l) == 0:
         return 'Impairment: None'
-    return f'Impairment: ใน subtest ของ {link(imp_l)}'
-
+    if len(imp_m_l) == 0:
+        return f'Impairment: ใน subtest ของ {link(imp_l)}'
+    return f'Impairment: {link(imp_m_l)}\n(ใน subtest ของ {link(imp_l)})'
 
 def get_gca(df):
 
