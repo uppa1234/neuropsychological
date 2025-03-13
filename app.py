@@ -47,12 +47,33 @@ def get_mmse(df):
 def get_preserved(list, topic, df):
     preserved = []
     for item in list:
-        query = df.query(f'Topic == "{topic}" & Item == "{item}"').Interpretation.item() == 'Preserved'
+        try:
+            print(df.query(f'Topic == "{topic}" & Item == "{item}"'))
+            query = df.query(f'Topic == "{topic}" & Item == "{item}"').Interpretation.item() == 'Preserved'
+        except:
+            raise ValueError(f'Item {item} not found in {topic}')
         if query:
             preserved.append(item)
     if len(preserved) == 0:
         return 'Preserved: None'
     return 'Preserved: ' + link(preserved)
+
+def get_preserved_long(topic, df):
+    preserved_items = df.query(f'Topic == "{topic}" & Interpretation == "Preserved"')
+
+    preserved_main = preserved_items.query('Subtopic == "Main"').Item.unique().tolist()
+    preserved_sub = preserved_items.query('Subtopic != "Main"').Item.unique().tolist()
+
+    if not preserved_main and not preserved_sub:
+        return 'Preserved: None'
+
+    if not preserved_main:
+        return f'Preserved: ใน subtest ของ {link(preserved_sub)}'
+
+    preserved_main = [p for p in preserved_main if p != 'Full-Scale IQ']
+
+    return f'Preserved: {link(preserved_main)}\n(ใน subtest ของ {link(preserved_sub)})'
+
 
 def get_impaired(topic: str, df) -> str:
     imp = df.query(f'Topic == "{topic}" & Subtopic != "Main" & Interpretation != "Preserved"')
@@ -72,7 +93,8 @@ def get_gca(df):
 
     # Preserved
     parts = ['Verbal Parts', 'Performance Parts']
-    pre_text = get_preserved(parts, 'General Cognitive Ability', df=df)
+    # pre_text = get_preserved(parts, 'General Cognitive Ability', df=df)
+    pre_text = get_preserved_long('General Cognitive Ability', df=df)
 
     # Full-scale
     fsiq = df.query('Item == "Full-Scale IQ"').Interpretation.item()
@@ -98,7 +120,7 @@ def get_exec(df):
     imp_text = get_impaired('Executive Function', df=df)
 
     # Preserved
-    parts = ['Stroop', 'Letter Fluency', 'Category Fluency', 'Tower Test', 'Number Letter Switching', 'Motor Speed'] # , 'Clock Drawing'
+    parts = ['Stroop', 'Letter Fluency', 'Category Fluency', 'Tower Test', 'Trail Making Test', 'Motor Speed'] # , 'Clock Drawing', 'Number Letter Switching'
     pre_text = get_preserved(parts, 'Executive Function', df=df)
 
     return [imp_text, pre_text]
@@ -132,7 +154,8 @@ def get_mem(df):
 
     # Preserved
     parts = ['Immediate Memory', 'Delayed Memory', 'General Memory', 'Delayed Auditory Recognition', 'Working Memory', 'Learning Slope', 'Retention', 'Retrieval']
-    pre_text = get_preserved(parts, 'Memory', df=df)
+    # pre_text = get_preserved(parts, 'Memory', df=df)
+    pre_text = get_preserved_long('Memory', df=df)
 
     return [imp_text, pre_text]
 
@@ -163,11 +186,9 @@ def generate_word_document(excel_path):
     header_paragraph = header.paragraphs[0]
     df_header = pd.read_excel(excel_path, 0)
     header_text = (
-        df_header.iloc[18, 2] + '\n' +
-        df_header.iloc[19, 2] + '\n' +
-        df_header.iloc[20, 2]
+        df_header.iloc[21, 2]
     )
-    header_text = header_text[:header_text.find('ครั้งก่อนทำวันที่')].replace(' ', '  ')
+    # header_text = header_text[:header_text.find('ครั้งก่อนทำวันที่')].replace(' ', '  ')
     header_paragraph.text = header_text
     header_run = header_paragraph.runs[0]
     header_run.bold = True
